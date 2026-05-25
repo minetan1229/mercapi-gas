@@ -700,10 +700,21 @@ var bigInt = (function (undefined) {
     }
     var supportsNativeBigInt = typeof bigIntCtor === "function";
     function requireBigInt(value) {
-        if (!supportsNativeBigInt) {
+        if (!supportsNativeBigInt || !bigIntCtor) {
             throw new Error("BigInt is not supported in this runtime. Native BigInt operations are unavailable.");
         }
         return bigIntCtor(value);
+    }
+    function getNativeBigIntConstants() {
+        if (!getNativeBigIntConstants.cache) {
+            getNativeBigIntConstants.cache = {
+                zero: requireBigInt(0),
+                one: requireBigInt(1),
+                two: requireBigInt(2),
+                negOne: requireBigInt(-1)
+            };
+        }
+        return getNativeBigIntConstants.cache;
     }
 
     function Integer(v, radix, alphabet, caseSensitive) {
@@ -1354,11 +1365,12 @@ var bigInt = (function (undefined) {
     NativeBigInt.prototype.pow = function (v) {
         var n = parseValue(v);
         var a = this.value, b = n.value;
-        var _0 = requireBigInt(0), _1 = requireBigInt(1), _2 = requireBigInt(2);
+        var constants = getNativeBigIntConstants();
+        var _0 = constants.zero, _1 = constants.one, _2 = constants.two;
         if (b === _0) return Integer[1];
         if (a === _0) return Integer[0];
         if (a === _1) return Integer[1];
-        if (a === requireBigInt(-1)) return n.isEven() ? Integer[1] : Integer[-1];
+        if (a === constants.negOne) return n.isEven() ? Integer[1] : Integer[-1];
         if (n.isNegative()) return new NativeBigInt(_0);
         var x = this;
         var y = Integer[1];
@@ -1523,8 +1535,8 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 0;
     };
     NativeBigInt.prototype.isEven = function () {
-        var one = requireBigInt(1);
-        return (this.value & one) === requireBigInt(0);
+        var constants = getNativeBigIntConstants();
+        return (this.value & constants.one) === constants.zero;
     };
 
     BigInteger.prototype.isOdd = function () {
@@ -1534,8 +1546,8 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 1;
     };
     NativeBigInt.prototype.isOdd = function () {
-        var one = requireBigInt(1);
-        return (this.value & one) === one;
+        var constants = getNativeBigIntConstants();
+        return (this.value & constants.one) === constants.one;
     };
 
     BigInteger.prototype.isPositive = function () {
@@ -1561,7 +1573,7 @@ var bigInt = (function (undefined) {
         return Math.abs(this.value) === 1;
     };
     NativeBigInt.prototype.isUnit = function () {
-        return this.abs().value === requireBigInt(1);
+        return this.abs().value === getNativeBigIntConstants().one;
     };
 
     BigInteger.prototype.isZero = function () {
@@ -1571,7 +1583,7 @@ var bigInt = (function (undefined) {
         return this.value === 0;
     };
     NativeBigInt.prototype.isZero = function () {
-        return this.value === requireBigInt(0);
+        return this.value === getNativeBigIntConstants().zero;
     };
 
     BigInteger.prototype.isDivisibleBy = function (v) {
@@ -1677,8 +1689,8 @@ var bigInt = (function (undefined) {
         return new BigInteger(MAX_INT_ARR, false);
     };
     NativeBigInt.prototype.next = function () {
-        return new NativeBigInt(this.value + requireBigInt(1));
-    }
+        return new NativeBigInt(this.value + getNativeBigIntConstants().one);
+    };
 
     BigInteger.prototype.prev = function () {
         var value = this.value;
@@ -1693,8 +1705,8 @@ var bigInt = (function (undefined) {
         return new BigInteger(MAX_INT_ARR, true);
     };
     NativeBigInt.prototype.prev = function () {
-        return new NativeBigInt(this.value - requireBigInt(1));
-    }
+        return new NativeBigInt(this.value - getNativeBigIntConstants().one);
+    };
 
     var powersOfTwo = [1];
     while (2 * powersOfTwo[powersOfTwo.length - 1] <= BASE) powersOfTwo.push(2 * powersOfTwo[powersOfTwo.length - 1]);
