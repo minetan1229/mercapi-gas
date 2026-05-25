@@ -688,17 +688,12 @@ var bigInt = (function (undefined) {
         MAX_INT_ARR = smallToArray(MAX_INT),
         DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    var globalObject = (typeof globalThis !== "undefined" && globalThis) ||
-        (typeof self !== "undefined" && self) ||
-        (typeof window !== "undefined" && window) ||
-        (typeof global !== "undefined" && global) ||
+    var bigIntNative = (typeof globalThis !== "undefined" && globalThis && globalThis["BigInt"]) ||
+        (typeof self !== "undefined" && self && self["BigInt"]) ||
+        (typeof window !== "undefined" && window && window["BigInt"]) ||
+        (typeof global !== "undefined" && global && global["BigInt"]) ||
         null;
-    var bigIntNative = null;
-    var supportsNativeBigInt = false;
-    if (globalObject && typeof globalObject["BigInt"] === "function") {
-        bigIntNative = globalObject["BigInt"];
-        supportsNativeBigInt = true;
-    }
+    var supportsNativeBigInt = typeof bigIntNative === "function";
 
     function Integer(v, radix, alphabet, caseSensitive) {
         if (typeof v === "undefined") return Integer[0];
@@ -1518,7 +1513,7 @@ var bigInt = (function (undefined) {
     };
     NativeBigInt.prototype.isEven = function () {
         return (this.value & bigIntNative(1)) === bigIntNative(0);
-    }
+    };
 
     BigInteger.prototype.isOdd = function () {
         return (this.value[0] & 1) === 1;
@@ -1528,7 +1523,7 @@ var bigInt = (function (undefined) {
     };
     NativeBigInt.prototype.isOdd = function () {
         return (this.value & bigIntNative(1)) === bigIntNative(1);
-    }
+    };
 
     BigInteger.prototype.isPositive = function () {
         return !this.sign;
