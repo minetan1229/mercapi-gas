@@ -1523,7 +1523,8 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 0;
     };
     NativeBigInt.prototype.isEven = function () {
-        return (this.value & requireBigInt(1)) === requireBigInt(0);
+        var one = requireBigInt(1);
+        return (this.value & one) === requireBigInt(0);
     };
 
     BigInteger.prototype.isOdd = function () {
@@ -1533,7 +1534,8 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 1;
     };
     NativeBigInt.prototype.isOdd = function () {
-        return (this.value & requireBigInt(1)) === requireBigInt(1);
+        var one = requireBigInt(1);
+        return (this.value & one) === one;
     };
 
     BigInteger.prototype.isPositive = function () {
