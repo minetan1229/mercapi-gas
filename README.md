@@ -10,6 +10,7 @@ Google Apps Script (GAS) only implementation of `take-kun/mercapi`.
 - `Mercapi.items(profileId)`
 - DPoP (`ES256`) header generation in GAS code only
 - Search pagination helpers: `next_page()`, `prev_page()`
+- Compatible with both V8 and legacy GAS runtimes (uses BigInteger.js for ECC math)
 
 ## Setup
 
