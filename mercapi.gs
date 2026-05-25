@@ -1238,7 +1238,7 @@ var bigInt = (function (undefined) {
         }
         if (n.isSmall) {
             if (b === 1) return [self, Integer[0]];
-            if (b == -1) return [self.negate(), Integer[0]];
+            if (b === -1) return [self.negate(), Integer[0]];
             var abs = Math.abs(b);
             if (abs < BASE) {
                 value = divModSmall(a, abs);
@@ -1448,7 +1448,7 @@ var bigInt = (function (undefined) {
             a = this.value,
             b = n.value;
         if (n.isSmall) {
-            return a == b ? 0 : a > b ? 1 : -1;
+            return a === b ? 0 : a > b ? 1 : -1;
         }
         if (a < 0 !== n.sign) {
             return a < 0 ? -1 : 1;
@@ -1584,7 +1584,7 @@ var bigInt = (function (undefined) {
             if (n.lesser(a[i])) continue;
             x = bigInt(a[i]).modPow(b, n);
             if (x.isUnit() || x.equals(nPrev)) continue;
-            for (d = r - 1; d != 0; d--) {
+            for (d = r - 1; d !== 0; d--) {
                 x = x.square().mod(n);
                 if (x.isUnit()) return false;
                 if (x.equals(nPrev)) continue next;
@@ -2012,7 +2012,7 @@ var bigInt = (function (undefined) {
 
     SmallInteger.prototype.toString = function (radix, alphabet) {
         if (radix === undefined) radix = 10;
-        if (radix != 10 || alphabet) return toBaseString(this, radix, alphabet);
+        if (radix !== 10 || alphabet) return toBaseString(this, radix, alphabet);
         return String(this.value);
     };
 
