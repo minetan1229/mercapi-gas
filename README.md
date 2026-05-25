@@ -22,7 +22,7 @@ Google Apps Script (GAS) only implementation of `take-kun/mercapi`.
 ```javascript
 function runMercariSearch() {
   var m = new Mercapi();
-  var results = m.search('sharpnel');
+  var results = m.search('shrapnel');
 
   Logger.log('Found: ' + results.meta.num_found);
   if (results.items.length > 0) {

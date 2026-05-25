@@ -178,6 +178,7 @@ SearchRequestData.ShippingMethod = {
 SearchRequestData.Status = {
   STATUS_ON_SALE: 'STATUS_ON_SALE',
   STATUS_SOLD_OUT: 'STATUS_SOLD_OUT',
+  STATUS_TRADING: 'STATUS_TRADING',
 };
 
 SearchRequestData.SortBy = {
@@ -196,8 +197,8 @@ SearchRequestData.prototype.data = function () {
   var shippingMethods = (this.search_conditions.shipping_methods || []).slice();
   var status = (this.search_conditions.status || []).slice();
   if (status.indexOf(SearchRequestData.Status.STATUS_SOLD_OUT) >= 0 &&
-      status.indexOf('STATUS_TRADING') < 0) {
-    status.push('STATUS_TRADING');
+      status.indexOf(SearchRequestData.Status.STATUS_TRADING) < 0) {
+    status.push(SearchRequestData.Status.STATUS_TRADING);
   }
 
   return {
@@ -481,7 +482,7 @@ function mercapiMapShippingMethod(raw) {
   return {
     id_: mercapiPick(raw, ['id', 'id_'], null),
     name: mercapiPick(raw, ['name'], ''),
-    is_deprecated: mercapiPick(raw, ['isDeprecated', 'is_deprecated'], ''),
+    is_deprecated: !!mercapiPick(raw, ['isDeprecated', 'is_deprecated'], false),
   };
 }
 
