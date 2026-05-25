@@ -688,10 +688,10 @@ var bigInt = (function (undefined) {
         MAX_INT_ARR = smallToArray(MAX_INT),
         DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    var bigIntCtor = (typeof globalThis !== "undefined" && globalThis && globalThis["BigInt"]) ||
-        (typeof self !== "undefined" && self && self["BigInt"]) ||
-        (typeof window !== "undefined" && window && window["BigInt"]) ||
-        (typeof global !== "undefined" && global && global["BigInt"]) ||
+    var bigIntCtor = (typeof globalThis !== "undefined" && globalThis["BigInt"]) ||
+        (typeof self !== "undefined" && self["BigInt"]) ||
+        (typeof window !== "undefined" && window["BigInt"]) ||
+        (typeof global !== "undefined" && global["BigInt"]) ||
         null;
     var supportsNativeBigInt = typeof bigIntCtor === "function";
     function requireBigInt(value) {
