@@ -688,15 +688,17 @@ var bigInt = (function (undefined) {
         MAX_INT_ARR = smallToArray(MAX_INT),
         DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    var globalObject = (function () {
-        try {
-            return Function("return this")();
-        } catch (e) {
-            return null;
-        }
-    }());
-    var bigIntNative = globalObject && globalObject["BigInt"];
-    var supportsNativeBigInt = typeof bigIntNative === "function";
+    var globalObject = (typeof globalThis !== "undefined" && globalThis) ||
+        (typeof self !== "undefined" && self) ||
+        (typeof window !== "undefined" && window) ||
+        (typeof global !== "undefined" && global) ||
+        null;
+    var bigIntNative = null;
+    var supportsNativeBigInt = false;
+    if (globalObject && typeof globalObject["BigInt"] === "function") {
+        bigIntNative = globalObject["BigInt"];
+        supportsNativeBigInt = true;
+    }
 
     function Integer(v, radix, alphabet, caseSensitive) {
         if (typeof v === "undefined") return Integer[0];
