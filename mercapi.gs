@@ -688,11 +688,16 @@ var bigInt = (function (undefined) {
         MAX_INT_ARR = smallToArray(MAX_INT),
         DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    var bigIntCtor = (typeof globalThis !== "undefined" && globalThis["BigInt"]) ||
-        (typeof self !== "undefined" && self["BigInt"]) ||
-        (typeof window !== "undefined" && window["BigInt"]) ||
-        (typeof global !== "undefined" && global["BigInt"]) ||
-        null;
+    var bigIntCtor = null;
+    if (typeof globalThis !== "undefined" && typeof globalThis["BigInt"] === "function") {
+        bigIntCtor = globalThis["BigInt"];
+    } else if (typeof self !== "undefined" && typeof self["BigInt"] === "function") {
+        bigIntCtor = self["BigInt"];
+    } else if (typeof window !== "undefined" && typeof window["BigInt"] === "function") {
+        bigIntCtor = window["BigInt"];
+    } else if (typeof global !== "undefined" && typeof global["BigInt"] === "function") {
+        bigIntCtor = global["BigInt"];
+    }
     var supportsNativeBigInt = typeof bigIntCtor === "function";
     function requireBigInt(value) {
         if (!supportsNativeBigInt) {
