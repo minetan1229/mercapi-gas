@@ -688,7 +688,15 @@ var bigInt = (function (undefined) {
         MAX_INT_ARR = smallToArray(MAX_INT),
         DEFAULT_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-    var supportsNativeBigInt = typeof BigInt === "function";
+    var globalObject = (function () {
+        try {
+            return Function("return this")();
+        } catch (e) {
+            return null;
+        }
+    }());
+    var bigIntNative = globalObject && globalObject["BigInt"];
+    var supportsNativeBigInt = typeof bigIntNative === "function";
 
     function Integer(v, radix, alphabet, caseSensitive) {
         if (typeof v === "undefined") return Integer[0];
@@ -1338,11 +1346,11 @@ var bigInt = (function (undefined) {
     NativeBigInt.prototype.pow = function (v) {
         var n = parseValue(v);
         var a = this.value, b = n.value;
-        var _0 = BigInt(0), _1 = BigInt(1), _2 = BigInt(2);
+        var _0 = bigIntNative(0), _1 = bigIntNative(1), _2 = bigIntNative(2);
         if (b === _0) return Integer[1];
         if (a === _0) return Integer[0];
         if (a === _1) return Integer[1];
-        if (a === BigInt(-1)) return n.isEven() ? Integer[1] : Integer[-1];
+        if (a === bigIntNative(-1)) return n.isEven() ? Integer[1] : Integer[-1];
         if (n.isNegative()) return new NativeBigInt(_0);
         var x = this;
         var y = Integer[1];
@@ -1507,7 +1515,7 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 0;
     };
     NativeBigInt.prototype.isEven = function () {
-        return (this.value & BigInt(1)) === BigInt(0);
+        return (this.value & bigIntNative(1)) === bigIntNative(0);
     }
 
     BigInteger.prototype.isOdd = function () {
@@ -1517,7 +1525,7 @@ var bigInt = (function (undefined) {
         return (this.value & 1) === 1;
     };
     NativeBigInt.prototype.isOdd = function () {
-        return (this.value & BigInt(1)) === BigInt(1);
+        return (this.value & bigIntNative(1)) === bigIntNative(1);
     }
 
     BigInteger.prototype.isPositive = function () {
@@ -1543,7 +1551,7 @@ var bigInt = (function (undefined) {
         return Math.abs(this.value) === 1;
     };
     NativeBigInt.prototype.isUnit = function () {
-        return this.abs().value === BigInt(1);
+        return this.abs().value === bigIntNative(1);
     }
 
     BigInteger.prototype.isZero = function () {
@@ -1553,7 +1561,7 @@ var bigInt = (function (undefined) {
         return this.value === 0;
     };
     NativeBigInt.prototype.isZero = function () {
-        return this.value === BigInt(0);
+        return this.value === bigIntNative(0);
     }
 
     BigInteger.prototype.isDivisibleBy = function (v) {
@@ -1659,7 +1667,7 @@ var bigInt = (function (undefined) {
         return new BigInteger(MAX_INT_ARR, false);
     };
     NativeBigInt.prototype.next = function () {
-        return new NativeBigInt(this.value + BigInt(1));
+        return new NativeBigInt(this.value + bigIntNative(1));
     }
 
     BigInteger.prototype.prev = function () {
@@ -1675,7 +1683,7 @@ var bigInt = (function (undefined) {
         return new BigInteger(MAX_INT_ARR, true);
     };
     NativeBigInt.prototype.prev = function () {
-        return new NativeBigInt(this.value - BigInt(1));
+        return new NativeBigInt(this.value - bigIntNative(1));
     }
 
     var powersOfTwo = [1];
@@ -1779,7 +1787,7 @@ var bigInt = (function (undefined) {
         // BigInteger: return Min(lowestOneBit(n), 1 << 14) [BASE=1e7]
         var v = n.value,
             x = typeof v === "number" ? v | LOBMASK_I :
-                typeof v === "bigint" ? v | BigInt(LOBMASK_I) :
+                typeof v === "bigint" ? v | bigIntNative(LOBMASK_I) :
                     v[0] + v[1] * BASE | LOBMASK_BI;
         return x & -x;
     }
@@ -2037,7 +2045,7 @@ var bigInt = (function (undefined) {
         if (isPrecise(+v)) {
             var x = +v;
             if (x === truncate(x))
-                return supportsNativeBigInt ? new NativeBigInt(BigInt(x)) : new SmallInteger(x);
+                return supportsNativeBigInt ? new NativeBigInt(bigIntNative(x)) : new SmallInteger(x);
             throw new Error("Invalid integer: " + v);
         }
         var sign = v[0] === "-";
@@ -2062,7 +2070,7 @@ var bigInt = (function (undefined) {
         var isValid = /^([0-9][0-9]*)$/.test(v);
         if (!isValid) throw new Error("Invalid integer: " + v);
         if (supportsNativeBigInt) {
-            return new NativeBigInt(BigInt(sign ? "-" + v : v));
+            return new NativeBigInt(bigIntNative(sign ? "-" + v : v));
         }
         var r = [], max = v.length, l = LOG_BASE, min = max - l;
         while (max > 0) {
@@ -2077,7 +2085,7 @@ var bigInt = (function (undefined) {
 
     function parseNumberValue(v) {
         if (supportsNativeBigInt) {
-            return new NativeBigInt(BigInt(v));
+            return new NativeBigInt(bigIntNative(v));
         }
         if (isPrecise(v)) {
             if (v !== truncate(v)) throw new Error(v + " is not an integer.");
