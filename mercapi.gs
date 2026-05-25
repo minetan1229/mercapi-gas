@@ -701,7 +701,7 @@ var bigInt = (function (undefined) {
     var supportsNativeBigInt = typeof bigIntCtor === "function";
     function requireBigInt(value) {
         if (!supportsNativeBigInt) {
-            throw new Error("BigInt is not supported in this runtime.");
+            throw new Error("BigInt is not supported in this runtime. Native BigInt operations are unavailable.");
         }
         return bigIntCtor(value);
     }
@@ -1560,7 +1560,7 @@ var bigInt = (function (undefined) {
     };
     NativeBigInt.prototype.isUnit = function () {
         return this.abs().value === requireBigInt(1);
-    }
+    };
 
     BigInteger.prototype.isZero = function () {
         return false;
@@ -1570,7 +1570,7 @@ var bigInt = (function (undefined) {
     };
     NativeBigInt.prototype.isZero = function () {
         return this.value === requireBigInt(0);
-    }
+    };
 
     BigInteger.prototype.isDivisibleBy = function (v) {
         var n = parseValue(v);
