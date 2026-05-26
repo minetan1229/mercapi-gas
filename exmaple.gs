@@ -3,6 +3,7 @@ var MERCAPI_EXAMPLE_LOG_SHEET = 'log';
 var MERCAPI_EXAMPLE_TEMP_SHEET = 'Temporary';
 var MERCAPI_EXAMPLE_TRIGGER_FUNCTION = 'runMercapiSearches';
 var MERCAPI_EXAMPLE_MAX_TRACKED_ITEMS = 50;
+var MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE = 'success';
 
 function setupMercapiSearchTrigger() {
   var triggers = ScriptApp.getProjectTriggers();
@@ -44,13 +45,18 @@ function runMercapiSearches() {
   ]);
 
   var searches = mercapiLoadSearchRows_(searchSheet);
-  if (!searches.length) return;
+  var now = new Date();
+  var logRows = [];
+  if (!searches.length) {
+    logRows.push(mercapiBuildRunLogRow_(now, MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE));
+    mercapiAppendRows_(logSheet, logRows);
+    Logger.log('Run completed: ' + MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE);
+    return;
+  }
 
   var tempIndex = mercapiLoadTempIndex_(tempSheet);
   var mercapi = new Mercapi();
-  var now = new Date();
   var newItems = [];
-  var logRows = [];
 
   for (var i = 0; i < searches.length; i++) {
     var search = searches[i];
@@ -96,6 +102,8 @@ function runMercapiSearches() {
     mercapiUpdateTempRow_(tempSheet, tempEntry ? tempEntry.row : null, search.key, items, now);
   }
 
+  logRows.push(mercapiBuildRunLogRow_(now, MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE));
+
   if (logRows.length) {
     mercapiAppendRows_(logSheet, logRows);
   }
@@ -103,6 +111,8 @@ function runMercapiSearches() {
   if (newItems.length) {
     mercapiSendNotification_(newItems);
   }
+
+  Logger.log('Run completed: ' + MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE);
 }
 
 function mercapiLoadSearchRows_(sheet) {
@@ -213,6 +223,10 @@ function mercapiHasSameToken_(tokenMap, id, timestamp) {
 function mercapiAppendRows_(sheet, rows) {
   var startRow = sheet.getLastRow() + 1;
   sheet.getRange(startRow, 1, rows.length, rows[0].length).setValues(rows);
+}
+
+function mercapiBuildRunLogRow_(timestamp, status) {
+  return [timestamp, 'run', '', '', '', '', '', status, timestamp, ''];
 }
 
 function mercapiBuildItemUrl_(itemId) {
