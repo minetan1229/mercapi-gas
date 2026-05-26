@@ -43,76 +43,79 @@ function runMercapiSearches() {
     'item_tokens',
     'updated_at',
   ]);
-
-  var searches = mercapiLoadSearchRows_(searchSheet);
   var now = new Date();
   var logRows = [];
-  if (!searches.length) {
-    logRows.push(mercapiBuildRunLogRow_(now, MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE));
-    mercapiAppendRows_(logSheet, logRows);
-    Logger.log('Run completed: ' + MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE);
-    return;
-  }
-
-  var tempIndex = mercapiLoadTempIndex_(tempSheet);
-  var mercapi = new Mercapi();
+  var runStatus = MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE;
   var newItems = [];
 
-  for (var i = 0; i < searches.length; i++) {
-    var search = searches[i];
-    var results = mercapi.search(search.keyword, {
-      price_min: search.min_price || 0,
-      price_max: search.max_price || 0,
-      sort_by: SearchRequestData.SortBy.SORT_CREATED_TIME,
-      sort_order: SearchRequestData.SortOrder.ORDER_DESC,
-    });
-    var items = (results.items || []).slice(0, MERCAPI_EXAMPLE_MAX_TRACKED_ITEMS);
-    var tempEntry = tempIndex[search.key];
-    var previousTokens = tempEntry ? tempEntry.tokens : null;
-
-    if (previousTokens) {
-      for (var j = 0; j < items.length; j++) {
-        var item = items[j];
-        var updatedAt = mercapiItemTimestamp_(item);
-        if (!mercapiHasSameToken_(previousTokens, item.id_, updatedAt)) {
-          var url = mercapiBuildItemUrl_(item.id_);
-          newItems.push({
-            keyword: search.keyword,
-            min_price: search.min_price,
-            max_price: search.max_price,
-            item: item,
-            url: url,
-          });
-          logRows.push([
-            now,
-            search.keyword,
-            search.min_price || '',
-            search.max_price || '',
-            item.id_,
-            item.name,
-            item.price,
-            item.status,
-            item.updated || item.created || '',
-            url,
-          ]);
-        }
-      }
+  try {
+    var searches = mercapiLoadSearchRows_(searchSheet);
+    if (!searches.length) {
+      return;
     }
 
-    mercapiUpdateTempRow_(tempSheet, tempEntry ? tempEntry.row : null, search.key, items, now);
+    var tempIndex = mercapiLoadTempIndex_(tempSheet);
+    var mercapi = new Mercapi();
+
+    for (var i = 0; i < searches.length; i++) {
+      var search = searches[i];
+      var results = mercapi.search(search.keyword, {
+        price_min: search.min_price || 0,
+        price_max: search.max_price || 0,
+        sort_by: SearchRequestData.SortBy.SORT_CREATED_TIME,
+        sort_order: SearchRequestData.SortOrder.ORDER_DESC,
+      });
+      var items = (results.items || []).slice(0, MERCAPI_EXAMPLE_MAX_TRACKED_ITEMS);
+      var tempEntry = tempIndex[search.key];
+      var previousTokens = tempEntry ? tempEntry.tokens : null;
+
+      if (previousTokens) {
+        for (var j = 0; j < items.length; j++) {
+          var item = items[j];
+          var updatedAt = mercapiItemTimestamp_(item);
+          if (!mercapiHasSameToken_(previousTokens, item.id_, updatedAt)) {
+            var url = mercapiBuildItemUrl_(item.id_);
+            newItems.push({
+              keyword: search.keyword,
+              min_price: search.min_price,
+              max_price: search.max_price,
+              item: item,
+              url: url,
+            });
+            logRows.push([
+              now,
+              search.keyword,
+              search.min_price || '',
+              search.max_price || '',
+              item.id_,
+              item.name,
+              item.price,
+              item.status,
+              item.updated || item.created || '',
+              url,
+            ]);
+          }
+        }
+      }
+
+      mercapiUpdateTempRow_(tempSheet, tempEntry ? tempEntry.row : null, search.key, items, now);
+    }
+
+    if (newItems.length) {
+      mercapiSendNotification_(newItems);
+    }
+  } catch (err) {
+    var message = err && err.message ? err.message : String(err);
+    runStatus = 'error: ' + message;
+    Logger.log('Run failed: ' + message);
+    throw err;
+  } finally {
+    logRows.push(mercapiBuildRunLogRow_(now, runStatus));
+    if (logRows.length) {
+      mercapiAppendRows_(logSheet, logRows);
+    }
+    Logger.log('Run completed: ' + runStatus);
   }
-
-  logRows.push(mercapiBuildRunLogRow_(now, MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE));
-
-  if (logRows.length) {
-    mercapiAppendRows_(logSheet, logRows);
-  }
-
-  if (newItems.length) {
-    mercapiSendNotification_(newItems);
-  }
-
-  Logger.log('Run completed: ' + MERCAPI_EXAMPLE_RUN_STATUS_MESSAGE);
 }
 
 function mercapiLoadSearchRows_(sheet) {
